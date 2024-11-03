@@ -68,7 +68,7 @@ def pages(
 
     for source_path in input_paths:
         if create_subdir:
-            dest_dir = path_out / Path(source_path.name)
+            dest_dir = path_out / Path(source_path.name) / Path("pages")
         else:
             dest_dir = path_out
         page_count = write_pages(source_path, dest_dir, overwrite)

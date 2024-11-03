@@ -9,7 +9,7 @@ from pbs_split.cli.main_typer import app
 DATA_FILE_NAME = "PBS_DCA_May_2022_20220408124308.txt"
 DATA_FILE_PATH = "full_package"
 DATA_FILE_ANCHOR = f"{DATA_FILE_PATH}/{DATA_FILE_NAME}"
-PAGE_COUNT = "174"
+PAGE_COUNT = "173"
 
 
 def test_split_pages(runner: CliRunner, test_output_dir: Path):

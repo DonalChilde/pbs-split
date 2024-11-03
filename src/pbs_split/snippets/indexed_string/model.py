@@ -1,7 +1,8 @@
 from dataclasses import dataclass
+from typing import Protocol, TypedDict
 
 
-@dataclass
+@dataclass(slots=True)
 class IndexedString:
     idx: int
     txt: str
@@ -12,3 +13,13 @@ class IndexedString:
 
     def __str__(self):
         return f"{self.idx}: {self.txt!r}"
+
+
+class IndexedStringProtocol(Protocol):
+    idx: int
+    txt: str
+
+
+class IndexedStringTD(TypedDict):
+    idx: int
+    txt: str
