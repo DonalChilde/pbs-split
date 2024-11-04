@@ -1,7 +1,7 @@
 import json
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Dict, List, Self, TypedDict
+from typing import List, Self, TypedDict
 
 from pbs_split.snippets.hash.model import HashedFile, HashedFileProtocol, HashedFileTD
 from pbs_split.snippets.indexed_string.model import (
@@ -22,6 +22,9 @@ class TripTD(TypedDict):
     package_hash: HashedFileTD
     page_hash: HashedFileTD
     trip_index: int
+    header_1: IndexedStringTD
+    header_2: IndexedStringTD
+    footer: IndexedStringTD
     lines: List[IndexedStringTD]
 
 
@@ -34,9 +37,9 @@ class Page:
     @classmethod
     def from_dict(cls, data: PageTD) -> Self:
         return cls(
-            package_hash=HashedFile(**data.get("package_hash")),
-            page_index=data.get("page_index"),
-            lines=[IndexedString(**x) for x in data.get("lines")],
+            package_hash=HashedFile(**data.get("package_hash")),  # type: ignore
+            page_index=data.get("page_index"),  # type: ignore
+            lines=[IndexedString(**x) for x in data.get("lines")],  # type: ignore
         )
 
     @classmethod
@@ -55,15 +58,21 @@ class Trip:
     package_hash: HashedFileProtocol
     page_hash: HashedFileProtocol
     trip_index: int
+    header_1: IndexedStringProtocol
+    header_2: IndexedStringProtocol
+    footer: IndexedStringProtocol
     lines: List[IndexedStringProtocol] = field(default_factory=list)
 
     @classmethod
     def from_dict(cls, data: TripTD) -> Self:
         return cls(
-            package_hash=HashedFile(**data.get("package_hash")),
-            page_hash=HashedFile(**data.get("page_hash")),
-            trip_index=data.get("trip_index"),
-            lines=[IndexedString(**x) for x in data.get("lines")],
+            package_hash=HashedFile(**data.get("package_hash")),  # type: ignore
+            page_hash=HashedFile(**data.get("page_hash")),  # type: ignore
+            trip_index=data.get("trip_index"),  # type: ignore
+            header_1=IndexedString(**data.get("header_1")),  # type: ignore
+            header_2=IndexedString(**data.get("header_2")),  # type: ignore
+            footer=IndexedString(**data.get("footer")),  # type: ignore
+            lines=[IndexedString(**x) for x in data.get("lines")],  # type: ignore
         )
 
     @classmethod

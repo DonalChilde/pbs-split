@@ -33,16 +33,21 @@ def trips_in_page(page: Page, page_hash: HashedFileProtocol) -> Iterator[Trip]:
             package_hash=page.package_hash,
             page_hash=page_hash,
             trip_index=idx,
+            header_1=page.lines[0],
+            header_2=page.lines[1],
+            footer=page.lines[-1],
             lines=trip_lines,
         )
         yield trip
 
 
-def write_trip(path_in: Path, path_out: Path, overwrite: bool) -> int:
+def write_trips(path_in: Path, path_out: Path, overwrite: bool) -> int:
     page = Page.from_file(path_in)
     hashed_file = make_hashed_file(path_in, hasher=md5())
     count = 0
-    for idx, trip in enumerate(trips_in_page(page=page, page_hash=hashed_file)):
+    for idx, trip in enumerate(
+        trips_in_page(page=page, page_hash=hashed_file), start=1
+    ):
         result_path = path_out / Path(f"{path_in.stem}-trip_{idx}.json")
         trip.to_file(path_out=result_path, overwrite=overwrite)
         count = idx

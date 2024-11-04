@@ -46,7 +46,7 @@ def write_pages(path_in: Path, path_out: Path, overwrite: bool) -> int:
     hashed_file = make_hashed_file(path_in, hasher=md5())
     for idx, page_lines in enumerate(pages_to_lines(reader), start=1):
         page = Page(package_hash=hashed_file, page_index=idx, lines=page_lines)
-        result_path = path_out / Path(f"{path_in.name}-page_{idx}.json")
+        result_path = path_out / Path(f"{path_in.stem}-page_{idx}.json")
         page.to_file(path_out=result_path, overwrite=overwrite)
         count = idx
     return count
