@@ -44,7 +44,7 @@ def pages(
     ],
     path_out: Annotated[
         Path,
-        typer.Argument(help="The output directory.", file_okay=False, writable=True),
+        typer.Argument(help="The output directory."),
     ],
     create_subdir: Annotated[
         bool,
@@ -109,7 +109,7 @@ def trips(
     ],
     path_out: Annotated[
         Path,
-        typer.Argument(help="The output directory.", file_okay=False, writable=True),
+        typer.Argument(help="The output directory."),
     ],
     create_subdir: Annotated[
         bool,
@@ -179,7 +179,7 @@ def text(
     ],
     path_out: Annotated[
         Path,
-        typer.Argument(help="The output directory.", file_okay=False, writable=True),
+        typer.Argument(help="The output directory."),
     ],
     overwrite: Annotated[
         bool,
