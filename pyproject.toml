@@ -1,5 +1,5 @@
 [build-system]
-requires = ["flit_core >=3.4,<4"]
+requires = ["flit_core >=3.10,<4"]
 build-backend = "flit_core.buildapi"
 
 [project]
@@ -17,7 +17,7 @@ classifiers = [
 authors = [{ name = "Chad Lowe", email = "pfmsoft.dev@gmail.com" }]
 name = "pbs-split"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 license = { file = "LICENSE" }
 dynamic = ["version", "description"]
 # https://chrisholdgraf.com/blog/2022/install-github-from-pyproject/
