@@ -1,18 +1,14 @@
-import json
-from dataclasses import asdict
 from hashlib import md5
 from pathlib import Path
 from typing import Iterable, Iterator, List
 
 from pbs_split.models import Page
-from pbs_split.snippets.file.line_number_reader import line_number_reader
 from pbs_split.snippets.hash.make_hashed_file import make_hashed_file
 from pbs_split.snippets.indexed_string.index_strings import index_file
 from pbs_split.snippets.indexed_string.model import IndexedStringProtocol
-from pbs_split.snippets.validate_file_out import validate_file_out
 
 
-def pages_to_lines(
+def package_to_lines_of_pages(
     lines: Iterable[IndexedStringProtocol],
 ) -> Iterator[List[IndexedStringProtocol]]:
     accumulated_lines: List[IndexedStringProtocol] = []
@@ -40,13 +36,39 @@ def pages_to_lines(
             yield result
 
 
-def write_pages(path_in: Path, path_out: Path, overwrite: bool) -> int:
+def parse_pages(path_in: Path) -> List[Page]:
     reader = index_file(file_path=path_in, index_start=1)
-    count = 0
     hashed_file = make_hashed_file(path_in, hasher=md5())
-    for idx, page_lines in enumerate(pages_to_lines(reader), start=1):
-        page = Page(package_hash=hashed_file, page_index=idx, lines=page_lines)
-        result_path = path_out / Path(f"{path_in.stem}-page_{idx}.json")
+    pages: List[Page] = []
+    for idx, lines_of_page in enumerate(package_to_lines_of_pages(reader), start=1):
+        page = Page(package_hash=hashed_file, page_index=idx, lines=lines_of_page)
+        pages.append(page)
+    return pages
+
+
+def write_pages(
+    file_stem: str, pages: List[Page], path_out: Path, overwrite: bool
+) -> int:
+    count = len(pages)
+    for page in pages:
+        result_path = path_out / Path(
+            f"{file_stem}.page_{page.page_index}_of{count}.json"
+        )
         page.to_file(path_out=result_path, overwrite=overwrite)
-        count = idx
     return count
+
+
+# def write_pages(path_in: Path, path_out: Path, overwrite: bool) -> int:
+#     reader = index_file(file_path=path_in, index_start=1)
+#     count = 0
+#     hashed_file = make_hashed_file(path_in, hasher=md5())
+#     pages: List[Page] = []
+#     for idx, lines_of_page in enumerate(package_to_lines_of_pages(reader), start=1):
+#         page = Page(package_hash=hashed_file, page_index=idx, lines=lines_of_page)
+#         count = idx
+#     for page in pages:
+#         result_path = path_out / Path(
+#             f"{path_in.stem}.page_{page.page_index}_of{idx}.json"
+#         )
+#         page.to_file(path_out=result_path, overwrite=overwrite)
+#     return count
