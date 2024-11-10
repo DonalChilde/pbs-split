@@ -5,14 +5,14 @@ from typing import Iterable, Iterator, List
 from pbs_split.models import Page, Trip
 from pbs_split.snippets.hash.make_hashed_file import make_hashed_file
 from pbs_split.snippets.hash.model import HashedFileProtocol
-from pbs_split.snippets.indexed_string.model import IndexedStringProtocol
+from pbs_split.snippets.indexed_string.model import IndexedString, IndexedStrings
 
 
 def page_to_lines_of_trips(
-    lines: Iterable[IndexedStringProtocol],
-) -> Iterator[List[IndexedStringProtocol]]:
+    lines: Iterable[IndexedString],
+) -> Iterator[List[IndexedString]]:
     is_trip = False
-    accumulated_lines: List[IndexedStringProtocol] = []
+    accumulated_lines: List[IndexedString] = []
     for indexed_line in lines:
         if is_trip:
             accumulated_lines.append(indexed_line)
@@ -28,15 +28,18 @@ def page_to_lines_of_trips(
 
 
 def parse_trips(page: Page, page_hash: HashedFileProtocol) -> Iterator[Trip]:
-    for idx, trip_lines in enumerate(page_to_lines_of_trips(page.lines), start=1):
+    for idx, trip_lines in enumerate(
+        page_to_lines_of_trips(page.lines.strings), start=1
+    ):
+        indexed_lines = IndexedStrings(strings=tuple(trip_lines))
         trip = Trip(
             package_hash=page.package_hash,
             page_hash=page_hash,
             trip_index=idx,
-            header_1=page.lines[0],
-            header_2=page.lines[1],
-            footer=page.lines[-1],
-            lines=trip_lines,
+            header_1=page.lines.strings[0],
+            header_2=page.lines.strings[1],
+            footer=page.lines.strings[-1],
+            lines=indexed_lines,
         )
         yield trip
 

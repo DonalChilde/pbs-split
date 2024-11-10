@@ -17,7 +17,7 @@ class IndexedString:
 
 @dataclass(slots=True, frozen=True)
 class IndexedStrings:
-    strings: Tuple[IndexedString] = ()
+    strings: Tuple[IndexedString, ...] = ()
 
 
 class IndexedStringProtocol(Protocol):

@@ -6,7 +6,6 @@ from typing import List, Self, TypedDict
 from pbs_split.snippets.hash.model import HashedFile, HashedFileProtocol, HashedFileTD
 from pbs_split.snippets.indexed_string.model import (
     IndexedString,
-    IndexedStringProtocol,
     IndexedStrings,
     IndexedStringTD,
 )
@@ -33,14 +32,15 @@ class TripTD(TypedDict):
 class Page:
     package_hash: HashedFileProtocol
     page_index: int
-    lines: List[IndexedStringProtocol] = field(default_factory=list)
+    # lines: List[IndexedStringProtocol] = field(default_factory=list)
+    lines: IndexedStrings
 
     @classmethod
     def from_dict(cls, data: PageTD) -> Self:
         return cls(
             package_hash=HashedFile(**data.get("package_hash")),  # type: ignore
             page_index=data.get("page_index"),  # type: ignore
-            lines=[IndexedString(**x) for x in data.get("lines")],  # type: ignore
+            lines=tuple([IndexedString(**x) for x in data.get("lines")]),  # type: ignore
         )
 
     @classmethod
@@ -59,11 +59,11 @@ class Trip:
     package_hash: HashedFileProtocol
     page_hash: HashedFileProtocol
     trip_index: int
-    header_1: IndexedStringProtocol
-    header_2: IndexedStringProtocol
-    footer: IndexedStringProtocol
-    lines: List[IndexedStringProtocol] = field(default_factory=list)
-    # lines: IndexedStrings
+    header_1: IndexedString
+    header_2: IndexedString
+    footer: IndexedString
+    # lines: List[IndexedString] = field(default_factory=list)
+    lines: IndexedStrings
 
     @classmethod
     def from_dict(cls, data: TripTD) -> Self:
@@ -74,7 +74,7 @@ class Trip:
             header_1=IndexedString(**data.get("header_1")),  # type: ignore
             header_2=IndexedString(**data.get("header_2")),  # type: ignore
             footer=IndexedString(**data.get("footer")),  # type: ignore
-            lines=[IndexedString(**x) for x in data.get("lines")],  # type: ignore
+            lines=tuple([IndexedString(**x) for x in data.get("lines")]),  # type: ignore
         )
 
     @classmethod

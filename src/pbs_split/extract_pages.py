@@ -4,14 +4,18 @@ from typing import Iterable, Iterator, List
 
 from pbs_split.models import Page
 from pbs_split.snippets.hash.make_hashed_file import make_hashed_file
-from pbs_split.snippets.indexed_string.index_strings import index_file
-from pbs_split.snippets.indexed_string.model import IndexedStringProtocol
+from pbs_split.snippets.indexed_string.index_strings import index_file_line
+from pbs_split.snippets.indexed_string.model import (
+    IndexedString,
+    IndexedStringProtocol,
+    IndexedStrings,
+)
 
 
 def package_to_lines_of_pages(
-    lines: Iterable[IndexedStringProtocol],
-) -> Iterator[List[IndexedStringProtocol]]:
-    accumulated_lines: List[IndexedStringProtocol] = []
+    lines: Iterable[IndexedString],
+) -> Iterator[List[IndexedString]]:
+    accumulated_lines: List[IndexedString] = []
     first_page = -1
     lines_in_current_page = 0
     lines_since_last_page = 0
@@ -37,11 +41,12 @@ def package_to_lines_of_pages(
 
 
 def parse_pages(path_in: Path) -> List[Page]:
-    reader = index_file(file_path=path_in, index_start=1)
+    reader = index_file_line(file_path=path_in, index_start=1)
     hashed_file = make_hashed_file(path_in, hasher=md5())
     pages: List[Page] = []
     for idx, lines_of_page in enumerate(package_to_lines_of_pages(reader), start=1):
-        page = Page(package_hash=hashed_file, page_index=idx, lines=lines_of_page)
+        indexed_lines = IndexedStrings(strings=tuple(lines_of_page))
+        page = Page(package_hash=hashed_file, page_index=idx, lines=indexed_lines)
         pages.append(page)
     return pages
 
