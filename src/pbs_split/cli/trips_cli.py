@@ -15,7 +15,7 @@ from rich.progress import (
 )
 from typing_extensions import Annotated
 
-from pbs_split.extract_trips import write_trips
+from pbs_split.extract_trips import parse_trips_from_file, write_trips
 from pbs_split.snippets.file.path_delta import path_delta
 
 app = typer.Typer()
@@ -83,7 +83,13 @@ def extract_trips(
             dest_dir = path_out / Path("trips")
         else:
             dest_dir = path_out
-        trip_count = write_trips(source_path, dest_dir, overwrite)
+        trips = parse_trips_from_file(path_in=source_path)
+        trip_count = write_trips(
+            file_stem=source_path.stem,
+            trips=trips,
+            path_out=dest_dir,
+            overwrite=overwrite,
+        )
         total_trips += trip_count
     typer.echo(
         f"Found {total_trips} trips in {len(input_paths)} files, output to {dest_dir}"

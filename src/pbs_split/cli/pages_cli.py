@@ -15,7 +15,7 @@ from rich.progress import (
 )
 from typing_extensions import Annotated
 
-from pbs_split.extract_pages import parse_pages, write_pages
+from pbs_split.extract_pages import parse_pages_from_file, write_pages
 from pbs_split.snippets.file.path_delta import path_delta
 
 app = typer.Typer()
@@ -69,7 +69,7 @@ def split(
     )
 
 
-def split_pages(ctx: typer.Context, jobs: SplitPageJobs):
+def split_all(ctx: typer.Context, jobs: SplitPageJobs):
     pass
 
 
@@ -96,7 +96,7 @@ def extract_pages(
             dest_dir = path_out / Path(source_path.stem) / Path("pages")
         else:
             dest_dir = path_out
-        pages = parse_pages(path_in=source_path)
+        pages = parse_pages_from_file(path_in=source_path)
         write_count = write_pages(
             file_stem=source_path.stem,
             pages=pages,

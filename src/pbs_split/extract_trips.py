@@ -27,6 +27,12 @@ def page_to_lines_of_trips(
             yield result
 
 
+def parse_trips_from_file(path_in: Path) -> Iterator[Trip]:
+    page = Page.from_file(path_in)
+    hashed_file = make_hashed_file(path_in, hasher=md5())
+    yield from parse_trips(page=page, page_hash=hashed_file)
+
+
 def parse_trips(page: Page, page_hash: HashedFileProtocol) -> Iterator[Trip]:
     for idx, trip_lines in enumerate(
         page_to_lines_of_trips(page.lines.strings), start=1
@@ -44,12 +50,24 @@ def parse_trips(page: Page, page_hash: HashedFileProtocol) -> Iterator[Trip]:
         yield trip
 
 
-def write_trips(path_in: Path, path_out: Path, overwrite: bool) -> int:
-    page = Page.from_file(path_in)
-    hashed_file = make_hashed_file(path_in, hasher=md5())
+def write_trips(file_stem: str, trips: Iterator[Trip], path_out: Path, overwrite: bool):
+    trips_list = list(trips)
     count = 0
-    for idx, trip in enumerate(parse_trips(page=page, page_hash=hashed_file), start=1):
-        result_path = path_out / Path(f"{path_in.stem}-trip_{trip.trip_index}.json")
+    for idx, trip in enumerate(trips_list, start=1):
+        result_path = path_out / Path(
+            f"{file_stem}.trip_{idx}_of_{len(trips_list)}.json"
+        )
         trip.to_file(path_out=result_path, overwrite=overwrite)
         count = idx
     return count
+
+
+# def write_trips(path_in: Path, path_out: Path, overwrite: bool) -> int:
+#     page = Page.from_file(path_in)
+#     hashed_file = make_hashed_file(path_in, hasher=md5())
+#     count = 0
+#     for idx, trip in enumerate(parse_trips(page=page, page_hash=hashed_file), start=1):
+#         result_path = path_out / Path(f"{path_in.stem}-trip_{trip.trip_index}.json")
+#         trip.to_file(path_out=result_path, overwrite=overwrite)
+#         count = idx
+#     return count

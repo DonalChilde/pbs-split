@@ -6,7 +6,7 @@ from tests.resources import RESOURCES_ANCHOR
 
 from pbs_split.models import Page
 
-DATA_FILE_NAME = "PBS_DCA_February_2023_20230110102037.pdf.txt-page_2.json"
+DATA_FILE_NAME = "PBS_DCA_May_2022_20220408124308.page_1_of_173.json"
 DATA_FILE_PATH = "page"
 DATA_FILE_ANCHOR = f"{DATA_FILE_PATH}/{DATA_FILE_NAME}"
 
@@ -17,4 +17,5 @@ def test_load_page():
         page = Page.from_file(input_path)
         page_json = json.loads(input_path.read_text(encoding="utf-8"))
         page_dict = asdict(page)
+        page_json["lines"]["strings"] = tuple(page_json.get("lines").get("strings"))
         assert page_json == page_dict

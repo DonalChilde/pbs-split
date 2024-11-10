@@ -40,7 +40,7 @@ class Page:
         return cls(
             package_hash=HashedFile(**data.get("package_hash")),  # type: ignore
             page_index=data.get("page_index"),  # type: ignore
-            lines=tuple([IndexedString(**x) for x in data.get("lines")]),  # type: ignore
+            lines=IndexedStrings(strings=tuple((IndexedString(**x) for x in data.get("lines").get("strings")))),  # type: ignore
         )
 
     @classmethod
@@ -74,7 +74,7 @@ class Trip:
             header_1=IndexedString(**data.get("header_1")),  # type: ignore
             header_2=IndexedString(**data.get("header_2")),  # type: ignore
             footer=IndexedString(**data.get("footer")),  # type: ignore
-            lines=tuple([IndexedString(**x) for x in data.get("lines")]),  # type: ignore
+            lines=IndexedStrings(strings=tuple((IndexedString(**x) for x in data.get("lines").get("strings")))),  # type: ignore
         )
 
     @classmethod
