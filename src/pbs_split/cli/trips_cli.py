@@ -62,10 +62,11 @@ def extract_trips(
     create_subdir: bool = True,
     overwrite: bool = False,
 ):
+    _ = ctx
     input_paths: List[Path] = []
     if path_in.is_dir():
         typer.echo(f"Looking for files in {path_in}")
-        files = [f for f in path_in.glob("*-page_*") if f.is_file()]
+        files = [f for f in path_in.glob("*.page_*") if f.is_file()]
         typer.echo(f"Found {len(files)} files")
         input_paths.extend(files)
     elif path_in.is_file():
@@ -73,7 +74,7 @@ def extract_trips(
     else:
         raise typer.BadParameter(
             "Input path is not a valid file, or directory containing valid files.\n"
-            "Files are expected to match *-page_*"
+            "Files are expected to match *.page_*"
         )
     typer.echo(f"Searching {len(input_paths)} files for trips.")
     total_trips = 0
