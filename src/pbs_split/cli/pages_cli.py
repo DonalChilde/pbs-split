@@ -104,5 +104,5 @@ def extract_pages(
             overwrite=overwrite,
         )
         typer.echo(
-            f"Found {len(pages)} pages in {source_path.name}, output to {dest_dir}"
+            f"Found {write_count} pages in {source_path.name}, output to {dest_dir}"
         )

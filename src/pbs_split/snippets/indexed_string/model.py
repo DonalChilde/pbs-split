@@ -1,8 +1,8 @@
-from dataclasses import dataclass
-from typing import Protocol, TypedDict
+from dataclasses import dataclass, field
+from typing import Protocol, Tuple, TypedDict
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class IndexedString:
     idx: int
     txt: str
@@ -13,6 +13,11 @@ class IndexedString:
 
     def __str__(self):
         return f"{self.idx}: {self.txt!r}"
+
+
+@dataclass(slots=True, frozen=True)
+class IndexedStrings:
+    strings: Tuple[IndexedString] = ()
 
 
 class IndexedStringProtocol(Protocol):

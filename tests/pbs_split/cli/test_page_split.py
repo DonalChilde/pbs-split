@@ -16,7 +16,7 @@ def test_split_pages(runner: CliRunner, test_output_dir: Path):
     file_resource = resources.files(RESOURCES_ANCHOR).joinpath(DATA_FILE_ANCHOR)
     path_out = test_output_dir
     with resources.as_file(file_resource) as input_path:
-        result = runner.invoke(app, ["pages", str(input_path), str(path_out)])
+        result = runner.invoke(app, ["pages", "split", str(input_path), str(path_out)])
         if result.stderr_bytes is not None:
             print(result.stderr)
         print(result.stdout)

@@ -22,7 +22,7 @@ app = typer.Typer()
 
 
 @app.command()
-def trips(
+def split(
     ctx: typer.Context,
     path_in: Annotated[
         Path,

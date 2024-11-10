@@ -42,3 +42,21 @@ def test_trips(runner: CliRunner) -> None:
     if result.stderr_bytes is not None:
         print(result.stderr)
     assert result.exit_code == 0
+
+
+def test_pages_split(runner: CliRunner) -> None:
+    """It exits with a status code of zero."""
+    result = runner.invoke(app, ["pages", "split", "--help"])
+    print(result.stdout)
+    if result.stderr_bytes is not None:
+        print(result.stderr)
+    assert result.exit_code == 0
+
+
+def test_trips_split(runner: CliRunner) -> None:
+    """It exits with a status code of zero."""
+    result = runner.invoke(app, ["trips", "split", "--help"])
+    print(result.stdout)
+    if result.stderr_bytes is not None:
+        print(result.stderr)
+    assert result.exit_code == 0

@@ -8,7 +8,7 @@ from pbs_split.snippets.hash.model import HashedFileProtocol
 from pbs_split.snippets.indexed_string.model import IndexedStringProtocol
 
 
-def trip_lines_in_page(
+def page_to_lines_of_trips(
     lines: Iterable[IndexedStringProtocol],
 ) -> Iterator[List[IndexedStringProtocol]]:
     is_trip = False
@@ -27,8 +27,8 @@ def trip_lines_in_page(
             yield result
 
 
-def trips_in_page(page: Page, page_hash: HashedFileProtocol) -> Iterator[Trip]:
-    for idx, trip_lines in enumerate(trip_lines_in_page(page.lines), start=1):
+def parse_trips(page: Page, page_hash: HashedFileProtocol) -> Iterator[Trip]:
+    for idx, trip_lines in enumerate(page_to_lines_of_trips(page.lines), start=1):
         trip = Trip(
             package_hash=page.package_hash,
             page_hash=page_hash,
@@ -45,10 +45,8 @@ def write_trips(path_in: Path, path_out: Path, overwrite: bool) -> int:
     page = Page.from_file(path_in)
     hashed_file = make_hashed_file(path_in, hasher=md5())
     count = 0
-    for idx, trip in enumerate(
-        trips_in_page(page=page, page_hash=hashed_file), start=1
-    ):
-        result_path = path_out / Path(f"{path_in.stem}-trip_{idx}.json")
+    for idx, trip in enumerate(parse_trips(page=page, page_hash=hashed_file), start=1):
+        result_path = path_out / Path(f"{path_in.stem}-trip_{trip.trip_index}.json")
         trip.to_file(path_out=result_path, overwrite=overwrite)
         count = idx
     return count

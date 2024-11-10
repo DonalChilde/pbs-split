@@ -7,6 +7,7 @@ from pbs_split.snippets.hash.model import HashedFile, HashedFileProtocol, Hashed
 from pbs_split.snippets.indexed_string.model import (
     IndexedString,
     IndexedStringProtocol,
+    IndexedStrings,
     IndexedStringTD,
 )
 from pbs_split.snippets.validate_file_out import validate_file_out
@@ -62,6 +63,7 @@ class Trip:
     header_2: IndexedStringProtocol
     footer: IndexedStringProtocol
     lines: List[IndexedStringProtocol] = field(default_factory=list)
+    # lines: IndexedStrings
 
     @classmethod
     def from_dict(cls, data: TripTD) -> Self:
