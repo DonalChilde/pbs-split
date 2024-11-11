@@ -19,4 +19,4 @@ def test_split_pages_to_trips(runner: CliRunner, test_output_dir: Path, capsys):
         with capsys.disabled():
             print(result.stdout)
         assert result.exit_code == 0
-        assert "Found 41 trips" in result.stdout
+        assert "41 trips found" in result.stdout

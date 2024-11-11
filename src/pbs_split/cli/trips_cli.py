@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from time import perf_counter_ns
-from typing import Iterable, List
+from typing import List
 
 import typer
 from rich.progress import (
@@ -21,6 +20,24 @@ from pbs_split.snippets.file.path_delta import path_delta
 app = typer.Typer()
 
 
+@dataclass
+class SplitTripJob:
+    path_in: Path
+    path_out: Path
+    overwrite: bool = False
+
+
+@dataclass
+class SplitTripJobs:
+    jobs: List[SplitTripJob] = field(default_factory=list)
+
+    def total_size_of_files(self) -> int:
+        total = 0
+        for job in self.jobs:
+            total += job.path_in.stat().st_size
+        return total
+
+
 @app.command()
 def split(
     ctx: typer.Context,
@@ -37,61 +54,92 @@ def split(
         Path,
         typer.Argument(help="The output directory."),
     ],
-    create_subdir: Annotated[
-        bool,
-        typer.Option(help="Create a subdirectory for the output of each input file."),
-    ] = True,
     overwrite: Annotated[
         bool,
         typer.Option(help="Allow overwriting output files."),
     ] = False,
 ):
-    extract_trips(
-        ctx=ctx,
-        path_in=path_in,
-        path_out=path_out,
-        create_subdir=create_subdir,
-        overwrite=overwrite,
-    )
-
-
-def extract_trips(
-    ctx: typer.Context,
-    path_in: Path,
-    path_out: Path,
-    create_subdir: bool = True,
-    overwrite: bool = False,
-):
     _ = ctx
-    input_paths: List[Path] = []
     if path_in.is_dir():
         typer.echo(f"Looking for files in {path_in}")
         files = [f for f in path_in.glob("*.page_*") if f.is_file()]
         typer.echo(f"Found {len(files)} files")
-        input_paths.extend(files)
+        # input_paths.extend(files)
     elif path_in.is_file():
-        input_paths.append(path_in)
+        files = [path_in]
     else:
         raise typer.BadParameter(
             "Input path is not a valid file, or directory containing valid files.\n"
             "Files are expected to match *.page_*"
         )
-    typer.echo(f"Searching {len(input_paths)} files for trips.")
-    total_trips = 0
-    dest_dir: Path = Path("")
-    for source_path in input_paths:
-        if create_subdir:
-            dest_dir = path_out / Path("trips")
-        else:
-            dest_dir = path_out
-        trips = parse_trips_from_file(path_in=source_path)
-        trip_count = write_trips(
-            file_stem=source_path.stem,
-            trips=trips,
-            path_out=dest_dir,
-            overwrite=overwrite,
+    typer.echo(f"Searching {len(files)} files for trips.")
+    jobs = SplitTripJobs()
+    for file in files:
+        jobs.jobs.append(
+            SplitTripJob(path_in=file, path_out=path_out, overwrite=overwrite)
         )
-        total_trips += trip_count
-    typer.echo(
-        f"Found {total_trips} trips in {len(input_paths)} files, output to {dest_dir}"
-    )
+    extract_trips_rich(jobs=jobs)
+
+
+# def extract_trips(
+#     ctx: typer.Context,
+#     path_in: Path,
+#     path_out: Path,
+#     overwrite: bool = False,
+# ):
+#     _ = ctx
+#     input_paths: List[Path] = []
+#     if path_in.is_dir():
+#         typer.echo(f"Looking for files in {path_in}")
+#         files = [f for f in path_in.glob("*.page_*") if f.is_file()]
+#         typer.echo(f"Found {len(files)} files")
+#         input_paths.extend(files)
+#     elif path_in.is_file():
+#         input_paths.append(path_in)
+#     else:
+#         raise typer.BadParameter(
+#             "Input path is not a valid file, or directory containing valid files.\n"
+#             "Files are expected to match *.page_*"
+#         )
+#     typer.echo(f"Searching {len(input_paths)} files for trips.")
+#     total_trips = 0
+#     for source_path in input_paths:
+#         trips = parse_trips_from_file(path_in=source_path)
+#         trip_count = write_trips(
+#             file_stem=source_path.stem,
+#             trips=trips,
+#             path_out=path_out,
+#             overwrite=overwrite,
+#         )
+#         total_trips += trip_count
+#     typer.echo(
+#         f"Found {total_trips} trips in {len(input_paths)} files, output to {path_out}"
+#     )
+
+
+def extract_trips_rich(jobs: SplitTripJobs):
+    file_count = len(jobs.jobs)
+    with Progress(
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TaskProgressColumn(),
+        FileSizeColumn(),
+        TotalFileSizeColumn(),
+        TimeElapsedColumn(),
+    ) as progress:
+        task = progress.add_task(f"1 of {file_count}", total=jobs.total_size_of_files())
+        total_trips = 0
+        for idx, job in enumerate(jobs.jobs, start=1):
+            trips = parse_trips_from_file(path_in=job.path_in)
+            trip_count = write_trips(
+                file_stem=job.path_in.stem,
+                trips=trips,
+                path_out=job.path_out,
+                overwrite=job.overwrite,
+            )
+            total_trips += trip_count
+            progress.update(
+                task,
+                advance=job.path_in.stat().st_size,
+                description=f"{idx} of {file_count}, {total_trips} trips found.",
+            )
