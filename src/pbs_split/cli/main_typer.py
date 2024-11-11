@@ -1,15 +1,11 @@
 """Command-line interface."""
 
-from pathlib import Path
 from time import perf_counter_ns
-from typing import Annotated, List
+from typing import Annotated
 
 import typer
 
 from pbs_split.cli import pages_cli, trips_cli
-from pbs_split.extract_pages import write_pages
-from pbs_split.extract_trips import write_trips
-from pbs_split.snippets.task_complete_typer import task_complete
 
 
 def default_options(

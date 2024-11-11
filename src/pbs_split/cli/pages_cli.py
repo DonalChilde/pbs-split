@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from time import perf_counter_ns
-from typing import Iterable, List
+from typing import Annotated, List
 
 import typer
 from rich.progress import (
@@ -13,10 +12,8 @@ from rich.progress import (
     TimeElapsedColumn,
     TotalFileSizeColumn,
 )
-from typing_extensions import Annotated
 
 from pbs_split.extract_pages import parse_pages_from_file, write_pages
-from pbs_split.snippets.file.path_delta import path_delta
 
 app = typer.Typer()
 
@@ -112,37 +109,3 @@ def extract_pages_rich(jobs: SplitPageJobs):
                 advance=job.path_in.stat().st_size,
                 description=f"{idx} of {file_count}, {total_pages} pages found.",
             )
-
-
-def extract_pages(
-    ctx: typer.Context,
-    path_in: Path,
-    path_out: Path,
-    overwrite: bool = False,
-):
-    input_paths: List[Path] = []
-    if path_in.is_dir():
-        files = [f for f in path_in.glob(".txt", case_sensitive=False) if f.is_file()]
-        input_paths.extend(files)
-    elif path_in.is_file():
-        input_paths.append(path_in)
-    else:
-        raise typer.BadParameter(
-            "Input path is not a valid file, or directory containing valid files."
-        )
-
-    for source_path in input_paths:
-        if len(input_paths) > 1:
-            dest_dir = path_out / Path(source_path.stem) / Path("pages")
-        else:
-            dest_dir = path_out
-        pages = parse_pages_from_file(path_in=source_path)
-        write_count = write_pages(
-            file_stem=source_path.stem,
-            pages=pages,
-            path_out=dest_dir,
-            overwrite=overwrite,
-        )
-        typer.echo(
-            f"Found {write_count} pages in {source_path.name}, output to {dest_dir}"
-        )

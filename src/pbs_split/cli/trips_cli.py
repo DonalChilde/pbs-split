@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List
+from typing import Annotated, List
 
 import typer
 from rich.progress import (
@@ -12,10 +12,8 @@ from rich.progress import (
     TimeElapsedColumn,
     TotalFileSizeColumn,
 )
-from typing_extensions import Annotated
 
 from pbs_split.extract_trips import parse_trips_from_file, write_trips
-from pbs_split.snippets.file.path_delta import path_delta
 
 app = typer.Typer()
 
@@ -79,42 +77,6 @@ def split(
             SplitTripJob(path_in=file, path_out=path_out, overwrite=overwrite)
         )
     extract_trips_rich(jobs=jobs)
-
-
-# def extract_trips(
-#     ctx: typer.Context,
-#     path_in: Path,
-#     path_out: Path,
-#     overwrite: bool = False,
-# ):
-#     _ = ctx
-#     input_paths: List[Path] = []
-#     if path_in.is_dir():
-#         typer.echo(f"Looking for files in {path_in}")
-#         files = [f for f in path_in.glob("*.page_*") if f.is_file()]
-#         typer.echo(f"Found {len(files)} files")
-#         input_paths.extend(files)
-#     elif path_in.is_file():
-#         input_paths.append(path_in)
-#     else:
-#         raise typer.BadParameter(
-#             "Input path is not a valid file, or directory containing valid files.\n"
-#             "Files are expected to match *.page_*"
-#         )
-#     typer.echo(f"Searching {len(input_paths)} files for trips.")
-#     total_trips = 0
-#     for source_path in input_paths:
-#         trips = parse_trips_from_file(path_in=source_path)
-#         trip_count = write_trips(
-#             file_stem=source_path.stem,
-#             trips=trips,
-#             path_out=path_out,
-#             overwrite=overwrite,
-#         )
-#         total_trips += trip_count
-#     typer.echo(
-#         f"Found {total_trips} trips in {len(input_paths)} files, output to {path_out}"
-#     )
 
 
 def extract_trips_rich(jobs: SplitTripJobs):
