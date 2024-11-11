@@ -1,10 +1,6 @@
-from hashlib import md5
 from pathlib import Path
 from typing import Iterable, Iterator, List
 
-from pbs_split.models import Page, Trip
-from pbs_split.snippets.hash.make_hashed_file import make_hashed_file
-from pbs_split.snippets.hash.model import HashedFileProtocol
 from pbs_split.snippets.indexed_string.model import IndexedString, IndexedStrings
 
 
@@ -27,30 +23,23 @@ def page_to_lines_of_trips(
             yield result
 
 
-def parse_trips_from_file(path_in: Path) -> Iterator[Trip]:
-    page = Page.from_file(path_in)
-    hashed_file = make_hashed_file(path_in, hasher=md5())
-    yield from parse_trips(page=page, page_hash=hashed_file)
+def parse_trips_from_file(path_in: Path) -> Iterator[IndexedStrings]:
+    page = IndexedStrings.from_file(path_in)
+    yield from parse_trips(page=page)
 
 
-def parse_trips(page: Page, page_hash: HashedFileProtocol) -> Iterator[Trip]:
-    for idx, trip_lines in enumerate(
-        page_to_lines_of_trips(page.lines.strings), start=1
-    ):
-        indexed_lines = IndexedStrings(strings=tuple(trip_lines))
-        trip = Trip(
-            package_hash=page.package_hash,
-            page_hash=page_hash,
-            trip_index=idx,
-            header_1=page.lines.strings[0],
-            header_2=page.lines.strings[1],
-            footer=page.lines.strings[-1],
-            lines=indexed_lines,
+def parse_trips(page: IndexedStrings) -> Iterator[IndexedStrings]:
+    for idx, trip_lines in enumerate(page_to_lines_of_trips(page.strings), start=1):
+        _ = idx
+        trip = IndexedStrings(
+            strings=(page.strings[0], page.strings[1], *trip_lines, page.strings[-1])
         )
         yield trip
 
 
-def write_trips(file_stem: str, trips: Iterator[Trip], path_out: Path, overwrite: bool):
+def write_trips(
+    file_stem: str, trips: Iterator[IndexedStrings], path_out: Path, overwrite: bool
+):
     trips_list = list(trips)
     count = 0
     for idx, trip in enumerate(trips_list, start=1):

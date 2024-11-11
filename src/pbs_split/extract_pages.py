@@ -1,10 +1,6 @@
-from hashlib import md5
 from pathlib import Path
 from typing import Iterable, Iterator, List
 
-from pbs_split.models import Page
-from pbs_split.snippets.hash.make_hashed_file import make_hashed_file
-from pbs_split.snippets.hash.model import HashedFileProtocol
 from pbs_split.snippets.indexed_string.index_strings import index_file_line
 from pbs_split.snippets.indexed_string.model import IndexedString, IndexedStrings
 
@@ -30,23 +26,19 @@ def package_to_lines_of_pages(
             yield result
 
 
-def parse_pages_from_file(path_in: Path) -> Iterator[Page]:
+def parse_pages_from_file(path_in: Path) -> Iterator[IndexedStrings]:
     reader = index_file_line(file_path=path_in, index_start=1)
-    hashed_file = make_hashed_file(path_in, hasher=md5())
-    yield from parse_pages(lines=reader, hashed_file=hashed_file)
+    yield from parse_pages(lines=reader)
 
 
-def parse_pages(
-    lines: Iterator[IndexedString], hashed_file: HashedFileProtocol
-) -> Iterator[Page]:
+def parse_pages(lines: Iterator[IndexedString]) -> Iterator[IndexedStrings]:
     for idx, lines_of_page in enumerate(package_to_lines_of_pages(lines), start=1):
         indexed_lines = IndexedStrings(strings=tuple(lines_of_page))
-        page = Page(package_hash=hashed_file, page_index=idx, lines=indexed_lines)
-        yield page
+        yield indexed_lines
 
 
 def write_pages(
-    file_stem: str, pages: Iterator[Page], path_out: Path, overwrite: bool
+    file_stem: str, pages: Iterator[IndexedStrings], path_out: Path, overwrite: bool
 ) -> int:
     pages_list = list(pages)
     count = 0
