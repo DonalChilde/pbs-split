@@ -4,7 +4,7 @@ from pathlib import Path
 from tests.resources import RESOURCES_ANCHOR
 
 from pbs_split.extract_trips import parse_trips_from_file, write_trips
-from pbs_split.snippets.indexed_string.model import IndexedStrings
+from pbs_split.models import trip_lines_serializer
 
 DATA_FILE_NAME = "PBS_DCA_May_2022_20220408124308.page_3_of_173.json"
 DATA_FILE_PATH = "page"
@@ -16,12 +16,12 @@ def test_page_to_trips(test_output_dir: Path):
     with resources.as_file(file_resource) as input_path:
         path_out = test_output_dir / Path("trip/test_page_to_trip")
         trips = parse_trips_from_file(input_path)
-
         count = write_trips(
             file_stem=input_path.stem, trips=trips, path_out=path_out, overwrite=False
         )
         files_output = list(path_out.glob("*.trip_*"))
         assert len(files_output) == count
         assert count == 5
-        trip = IndexedStrings.from_file(files_output[2])
-        assert len(trip.strings) > 5
+        serializer = trip_lines_serializer()
+        trip = serializer.load_from_json(path_in=files_output[2])
+        assert len(trip.lines) > 5

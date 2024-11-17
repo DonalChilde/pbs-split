@@ -36,5 +36,5 @@ def pytest_collection_modifyitems(config, items):
 @pytest.fixture(scope="session", name="test_output_dir")
 def test_output_dir_(tmp_path_factory) -> Path:
     """make a temp directory for output data."""
-    test_app_data_dir = tmp_path_factory.mktemp("pdf2txt")
+    test_app_data_dir = tmp_path_factory.mktemp("pbs-split")
     return test_app_data_dir

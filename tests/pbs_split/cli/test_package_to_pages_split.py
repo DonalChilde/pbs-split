@@ -15,7 +15,7 @@ PAGE_COUNT = "173"
 
 def test_split_package_to_pages(runner: CliRunner, test_output_dir: Path, capsys):
     file_resource = resources.files(RESOURCES_ANCHOR).joinpath(DATA_FILE_ANCHOR)
-    path_out = test_output_dir
+    path_out = test_output_dir / "cli" / "package_to_pages"
     with resources.as_file(file_resource) as input_path:
         result = runner.invoke(app, ["pages", "split", str(input_path), str(path_out)])
         if result.stderr_bytes is not None:
@@ -27,6 +27,7 @@ def test_split_package_to_pages(runner: CliRunner, test_output_dir: Path, capsys
 
 
 def test_parse_pages():
+    # TODO move this test
     file_resource = resources.files(RESOURCES_ANCHOR).joinpath(DATA_FILE_ANCHOR)
     count = 0
     with resources.as_file(file_resource) as input_path:

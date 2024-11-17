@@ -11,7 +11,7 @@ DATA_FILE_PATH = "page"
 
 def test_split_pages_to_trips(runner: CliRunner, test_output_dir: Path, capsys):
     file_resource = resources.files(RESOURCES_ANCHOR).joinpath(DATA_FILE_PATH)
-    path_out = test_output_dir / Path("split_pages_to_trips")
+    path_out = test_output_dir / "cli" / "pages_to_trips"
     with resources.as_file(file_resource) as input_path:
         result = runner.invoke(app, ["trips", "split", str(input_path), str(path_out)])
         if result.stderr_bytes is not None:

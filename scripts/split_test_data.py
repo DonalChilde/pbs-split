@@ -15,26 +15,26 @@ def get_text_source_files(path_in: Path) -> list[Path]:
     return list(path_in.glob("*.txt"))
 
 
-def remove_parsed_directories(source_file_paths: list[Path]):
+def remove_output_directories(source_file_paths: list[Path]):
     for file_path in source_file_paths:
-        parsed_dir = parsed_dir_from_source_file(file_path)
+        parsed_dir = output_base_dir_from_source_file(file_path)
         if parsed_dir.is_dir():
             shutil.rmtree(parsed_dir)
 
 
-def parsed_dir_from_source_file(source_path: Path) -> Path:
-    parsed_dir = source_path.parent / source_path.stem
-    return parsed_dir
+def output_base_dir_from_source_file(source_path: Path) -> Path:
+    output_dir = source_path.parent / source_path.stem
+    return output_dir
 
 
 def split_page_dir_from_source_file(source_file: Path) -> Path:
-    parsed_dir = parsed_dir_from_source_file(source_file)
+    parsed_dir = output_base_dir_from_source_file(source_file)
     page_dir = parsed_dir / "pages"
     return page_dir
 
 
 def split_trip_dir_from_source_path(source_file: Path) -> Path:
-    parsed_dir = parsed_dir_from_source_file(source_file)
+    parsed_dir = output_base_dir_from_source_file(source_file)
     trip_dir = parsed_dir / "trip"
     return trip_dir
 
@@ -91,7 +91,7 @@ def reset(
     based on the Path.stem of the source file.
     """
     source_files = get_text_source_files(path_in=path_in)
-    remove_parsed_directories(source_file_paths=source_files)
+    remove_output_directories(source_file_paths=source_files)
     typer.echo(f"Removed parsed directories from {path_in}")
 
 

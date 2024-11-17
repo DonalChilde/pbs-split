@@ -1,5 +1,7 @@
 {
- "strings": [
+ "uuid": "7b928bab-5428-4a19-81c2-b8609eb6ae45",
+ "idx": 8,
+ "lines": [
   {
    "idx": 1848,
    "txt": "\f   DAY          \u2212\u2212DEPARTURE\u2212\u2212    \u2212\u2212\u2212ARRIVAL\u2212\u2212\u2212                GRND/        REST/\n"

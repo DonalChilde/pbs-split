@@ -1,7 +1,15 @@
 from pathlib import Path
 from typing import Iterable, Iterator, List
+from uuid import uuid4
 
-from pbs_split.snippets.indexed_string.model import IndexedString, IndexedStrings
+from pfmsoft.snippets.indexed_string.model import IndexedString
+
+from pbs_split.models import (
+    PageLines,
+    TripLines,
+    page_lines_serializer,
+    trip_lines_serializer,
+)
 
 
 def page_to_lines_of_trips(
@@ -23,22 +31,25 @@ def page_to_lines_of_trips(
             yield result
 
 
-def parse_trips_from_file(path_in: Path) -> Iterator[IndexedStrings]:
-    page = IndexedStrings.from_file(path_in)
+def parse_trips_from_file(path_in: Path) -> Iterator[TripLines]:
+    serializer = page_lines_serializer()
+    page = serializer.load_from_json(path_in=path_in)
     yield from parse_trips(page=page)
 
 
-def parse_trips(page: IndexedStrings) -> Iterator[IndexedStrings]:
-    for idx, trip_lines in enumerate(page_to_lines_of_trips(page.strings), start=1):
-        _ = idx
-        trip = IndexedStrings(
-            strings=(page.strings[0], page.strings[1], *trip_lines, page.strings[-1])
+def parse_trips(page: PageLines) -> Iterator[TripLines]:
+    for idx, trip_lines in enumerate(page_to_lines_of_trips(page.lines), start=1):
+        trip = TripLines(
+            uuid=str(uuid4()),
+            source=page.uuid,
+            idx=idx,
+            lines=[page.lines[0], page.lines[1], *trip_lines, page.lines[-1]],
         )
         yield trip
 
 
 def write_trips(
-    file_stem: str, trips: Iterator[IndexedStrings], path_out: Path, overwrite: bool
+    file_stem: str, trips: Iterator[TripLines], path_out: Path, overwrite: bool
 ):
     trips_list = list(trips)
     count = 0
@@ -46,7 +57,10 @@ def write_trips(
         result_path = path_out / Path(
             f"{file_stem}.trip_{idx}_of_{len(trips_list)}.json"
         )
-        trip.to_file(path_out=result_path, overwrite=overwrite)
+        serializer = trip_lines_serializer()
+        serializer.save_as_json(
+            path_out=result_path, complex_obj=trip, overwrite=overwrite
+        )
         count = idx
     return count
 
