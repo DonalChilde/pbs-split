@@ -6,7 +6,12 @@
   "python.testing.pytestEnabled": true,
   "[git-commit]": { "editor.rulers": [50] },
   "[python]": {
-    "editor.rulers": [88, 120]
+    "editor.rulers": [88, 120],
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
   },
   "insertDateString.format": "iso",
   "python.analysis.extraPaths": ["./src"],
@@ -16,6 +21,5 @@
   "esbonio.sphinx.buildDir": "${workspaceFolder}/docs/build",
   "editor.quickSuggestions": {
     "comments": "on"
-  },
-  "python.analysis.typeCheckingMode": "basic"
+  }
 }
