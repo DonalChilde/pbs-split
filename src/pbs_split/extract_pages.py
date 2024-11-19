@@ -2,8 +2,8 @@ from pathlib import Path
 from typing import Iterable, Iterator, List
 from uuid import uuid4
 
-from pfmsoft.snippets.indexed_string.index_strings import index_lines_in_file
-from pfmsoft.snippets.indexed_string.model import IndexedString
+from pfmsoft.indexed_string.index_strings import index_lines_in_file
+from pfmsoft.indexed_string.model import IndexedString
 
 from pbs_split.models import PageLines, page_lines_serializer
 

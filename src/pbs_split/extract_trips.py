@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Iterable, Iterator, List
 from uuid import uuid4
 
-from pfmsoft.snippets.indexed_string.model import IndexedString
+from pfmsoft.indexed_string.model import IndexedString
 
 from pbs_split.models import (
     PageLines,
