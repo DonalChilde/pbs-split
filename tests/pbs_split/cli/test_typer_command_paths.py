@@ -16,7 +16,6 @@ def test_app(runner: CliRunner) -> None:
 
 
 def test_default_options(runner: CliRunner) -> None:
-
     result = runner.invoke(app, ["-vvv", "pages", "--help"])
     assert "Verbosity: 3" in result.stdout
     assert "Debug" in result.stdout
