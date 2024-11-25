@@ -1,6 +1,9 @@
-from dataclasses import dataclass, field
+"""Typer cli to split pages into trips."""
+
+from collections.abc import Sequence
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Annotated, List
+from typing import Annotated
 
 import typer
 from rich.progress import (
@@ -20,20 +23,19 @@ app = typer.Typer()
 
 @dataclass
 class SplitTripJob:
+    """Job container."""
+
     path_in: Path
     path_out: Path
     overwrite: bool = False
 
 
-@dataclass
-class SplitTripJobs:
-    jobs: List[SplitTripJob] = field(default_factory=list)
-
-    def total_size_of_files(self) -> int:
-        total = 0
-        for job in self.jobs:
-            total += job.path_in.stat().st_size
-        return total
+def total_size_of_files(jobs: Sequence[SplitTripJob]) -> int:
+    """Get total file size of jobs."""
+    total = 0
+    for job in jobs:
+        total += job.path_in.stat().st_size
+    return total
 
 
 @app.command()
@@ -57,7 +59,16 @@ def split(
         typer.Option(help="Allow overwriting output files."),
     ] = False,
 ):
+    """Split a page into trips."""
     _ = ctx
+    jobs = collect_jobs(path_in=path_in, path_out=path_out, overwrite=overwrite)
+    extract_trips_rich(jobs=jobs)
+
+
+def collect_jobs(
+    path_in: Path, path_out: Path, overwrite: bool
+) -> Sequence[SplitTripJob]:
+    """Build a collections of jobs to do."""
     if path_in.is_dir():
         typer.echo(f"Looking for files in {path_in}")
         files = [f for f in path_in.glob("*.page_*") if f.is_file()]
@@ -71,16 +82,15 @@ def split(
             "Files are expected to match *.page_*"
         )
     typer.echo(f"Searching {len(files)} files for trips.")
-    jobs = SplitTripJobs()
+    jobs: list[SplitTripJob] = []
     for file in files:
-        jobs.jobs.append(
-            SplitTripJob(path_in=file, path_out=path_out, overwrite=overwrite)
-        )
-    extract_trips_rich(jobs=jobs)
+        jobs.append(SplitTripJob(path_in=file, path_out=path_out, overwrite=overwrite))
+    return jobs
 
 
-def extract_trips_rich(jobs: SplitTripJobs):
-    file_count = len(jobs.jobs)
+def extract_trips_rich(jobs: Sequence[SplitTripJob]):
+    """Process the jobs to split trips."""
+    file_count = len(jobs)
     with Progress(
         TextColumn("[progress.description]{task.description}"),
         BarColumn(),
@@ -89,9 +99,11 @@ def extract_trips_rich(jobs: SplitTripJobs):
         TotalFileSizeColumn(),
         TimeElapsedColumn(),
     ) as progress:
-        task = progress.add_task(f"1 of {file_count}", total=jobs.total_size_of_files())
+        task = progress.add_task(
+            f"1 of {file_count}", total=total_size_of_files(jobs=jobs)
+        )
         total_trips = 0
-        for idx, job in enumerate(jobs.jobs, start=1):
+        for idx, job in enumerate(jobs, start=1):
             trips = parse_trips_from_file(path_in=job.path_in)
             trip_count = write_trips(
                 file_stem=job.path_in.stem,

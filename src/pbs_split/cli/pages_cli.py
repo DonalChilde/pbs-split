@@ -1,6 +1,9 @@
-from dataclasses import dataclass, field
+"""Typer cli to split pbs package txt to pages."""
+
+from collections.abc import Sequence
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Annotated, List
+from typing import Annotated
 
 import typer
 from rich.progress import (
@@ -20,20 +23,19 @@ app = typer.Typer()
 
 @dataclass
 class SplitPageJob:
+    """Job container."""
+
     path_in: Path
     path_out: Path
     overwrite: bool = False
 
 
-@dataclass
-class SplitPageJobs:
-    jobs: List[SplitPageJob] = field(default_factory=list)
-
-    def total_size_of_files(self) -> int:
-        total = 0
-        for job in self.jobs:
-            total += job.path_in.stat().st_size
-        return total
+def total_size_of_files(jobs: Sequence[SplitPageJob]) -> int:
+    """Get total file size of jobs."""
+    total = 0
+    for job in jobs:
+        total += job.path_in.stat().st_size
+    return total
 
 
 @app.command()
@@ -57,8 +59,16 @@ def split(
         typer.Option(help="Allow overwriting output files."),
     ] = False,
 ):
-    """"""
+    """Split the text version of a PBS pairing package into pages."""
+    _ = ctx
+    jobs = collect_jobs(path_in=path_in, path_out=path_out, overwrite=overwrite)
+    extract_pages_rich(jobs=jobs)
 
+
+def collect_jobs(
+    path_in: Path, path_out: Path, overwrite: bool
+) -> Sequence[SplitPageJob]:
+    """Build a collections of jobs to do."""
     if path_in.is_dir():
         files = [f for f in path_in.glob(".txt", case_sensitive=False) if f.is_file()]
     elif path_in.is_file():
@@ -67,24 +77,19 @@ def split(
         raise typer.BadParameter(
             "Input path is not a valid file, or directory containing valid files."
         )
-    jobs = SplitPageJobs()
+    jobs: list[SplitPageJob] = []
     for file in files:
         if len(files) > 1:
             dest_dir = path_out / Path(file.stem) / Path("pages")
         else:
             dest_dir = path_out
-        jobs.jobs.append(
-            SplitPageJob(path_in=file, path_out=dest_dir, overwrite=overwrite)
-        )
-    extract_pages_rich(jobs=jobs)
+        jobs.append(SplitPageJob(path_in=file, path_out=dest_dir, overwrite=overwrite))
+    return jobs
 
 
-def split_all(ctx: typer.Context, jobs: SplitPageJobs):
-    pass
-
-
-def extract_pages_rich(jobs: SplitPageJobs):
-    file_count = len(jobs.jobs)
+def extract_pages_rich(jobs: Sequence[SplitPageJob]):
+    """Process the jobs to split pages."""
+    file_count = len(jobs)
     with Progress(
         TextColumn("[progress.description]{task.description}"),
         BarColumn(),
@@ -93,9 +98,11 @@ def extract_pages_rich(jobs: SplitPageJobs):
         TotalFileSizeColumn(),
         TimeElapsedColumn(),
     ) as progress:
-        task = progress.add_task(f"1 of {file_count}", total=jobs.total_size_of_files())
+        task = progress.add_task(
+            f"1 of {file_count}", total=total_size_of_files(jobs=jobs)
+        )
         total_pages = 0
-        for idx, job in enumerate(jobs.jobs, start=1):
+        for idx, job in enumerate(jobs, start=1):
             pages = parse_pages_from_file(path_in=job.path_in)
             page_count = write_pages(
                 file_stem=job.path_in.stem,
