@@ -40,7 +40,6 @@ def parse_trips_from_file(path_in: Path) -> Iterator[TripLines]:
 def parse_trips(page: PageLines) -> Iterator[TripLines]:
     for idx, trip_lines in enumerate(page_to_lines_of_trips(page.lines), start=1):
         trip = TripLines(
-            uuid=str(uuid4()),
             source=page.uuid,
             idx=idx,
             lines=[page.lines[0], page.lines[1], *trip_lines, page.lines[-1]],

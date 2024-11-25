@@ -36,7 +36,7 @@ def parse_pages_from_file(path_in: Path) -> Iterator[PageLines]:
 
 def parse_pages(lines: Iterator[IndexedString]) -> Iterator[PageLines]:
     for idx, lines_of_page in enumerate(package_to_lines_of_pages(lines), start=1):
-        page = PageLines(uuid=str(uuid4()), idx=idx, lines=lines_of_page)
+        page = PageLines(idx=idx, lines=lines_of_page)
         yield page
 
 

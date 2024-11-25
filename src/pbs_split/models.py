@@ -1,8 +1,12 @@
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from typing import TypedDict
+from uuid import NAMESPACE_DNS, UUID, uuid5
 
 from pfmsoft.indexed_string.model import IndexedString, IndexedStringTD
 from pfmsoft.simple_serializer import DataclassSerializer
+
+PAGE_LINES_NS = uuid5(NAMESPACE_DNS, "pbs_split.pbs_2022_01.page_lines")
+TRIP_LINES_NS = uuid5(NAMESPACE_DNS, "pbs_split.pbs_2022_01.trip_lines")
 
 
 class PageLinesTD(TypedDict):
@@ -20,9 +24,26 @@ class TripLinesTD(TypedDict):
 
 @dataclass(slots=True)
 class PageLines:
-    uuid: str
     idx: int
+    uuid: str = ""
     lines: list[IndexedString] = field(default_factory=list)
+
+    def __post_init__(self):
+        """Init the uuid if missing, validate if not missing."""
+        current_uuid_str = str(self.make_uuid())
+        if self.uuid == "":
+            self.uuid = current_uuid_str
+            return
+        if self.uuid != current_uuid_str:
+            raise ValueError(
+                f"Supplied uuid: {self.uuid} does not match calculated uuid: {current_uuid_str}"
+            )
+
+    def make_uuid(self) -> UUID:
+        """Make a uuid from a namespace and the repr of asdict(self), minus the uuid field."""
+        data = asdict(self)
+        data.pop("uuid", None)
+        return uuid5(PAGE_LINES_NS, repr(data))
 
     @staticmethod
     def from_simple(simple_obj: PageLinesTD) -> "PageLines":
@@ -36,10 +57,27 @@ class PageLines:
 
 @dataclass(slots=True)
 class TripLines:
-    uuid: str
     source: str
     idx: int
+    uuid: str = ""
     lines: list[IndexedString] = field(default_factory=list)
+
+    def __post_init__(self):
+        """Init the uuid if missing, validate if not missing."""
+        current_uuid_str = str(self.make_uuid())
+        if self.uuid == "":
+            self.uuid = current_uuid_str
+            return
+        if self.uuid != current_uuid_str:
+            raise ValueError(
+                f"Supplied uuid: {self.uuid} does not match calculated uuid: {current_uuid_str}"
+            )
+
+    def make_uuid(self) -> UUID:
+        """Make a uuid from a namespace and the repr of asdict(self), minus the uuid field."""
+        data = asdict(self)
+        data.pop("uuid", None)
+        return uuid5(TRIP_LINES_NS, repr(data))
 
     @staticmethod
     def from_simple(simple_obj: TripLinesTD) -> "TripLines":
