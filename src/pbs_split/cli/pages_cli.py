@@ -1,5 +1,6 @@
 """Typer cli to split pbs package txt to pages."""
 
+import logging
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -18,6 +19,7 @@ from rich.progress import (
 
 from pbs_split.extract_pages import parse_pages_from_file, write_pages
 
+logger = logging.getLogger(__name__)
 app = typer.Typer()
 
 

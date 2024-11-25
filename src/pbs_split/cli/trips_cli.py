@@ -1,5 +1,6 @@
 """Typer cli to split pages into trips."""
 
+import logging
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -18,6 +19,7 @@ from rich.progress import (
 
 from pbs_split.extract_trips import parse_trips_from_file, write_trips
 
+logger = logging.getLogger(__name__)
 app = typer.Typer()
 
 
