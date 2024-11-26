@@ -89,7 +89,7 @@ def split_all(
         typer.Option(help="Allow overwriting output files."),
     ] = False,
 ):
-    """Split the text version of a PBS pairing package into pages.
+    """Split multiple text PBS pairing packages into pages.
 
     Files will be output to PATH_OUT/PATH_IN.stem/pages/
     """
@@ -119,12 +119,20 @@ def build_jobs_from_dir(
     path_in: Path, path_out: Path, overwrite: bool
 ) -> Sequence[SplitPageJob]:
     """Collect text files, and use to build `SplitPageJob`s."""
+    glob = "*.txt"
     if not path_in.is_dir():
         raise typer.BadParameter("PATH_IN should be a directory.")
-    files = [f for f in path_in.glob(".txt", case_sensitive=False) if f.is_file()]
+    typer.echo(f"Looking for files in {path_in}")
+    files = [f for f in path_in.glob(glob, case_sensitive=False) if f.is_file()]
+    typer.echo(f"Found {len(files)} text files.")
+    if len(files) == 0:
+        raise typer.BadParameter(
+            "Input path is not a directory containing valid files.\n"
+            f"Files are expected to match {glob}"
+        )
     jobs: list[SplitPageJob] = []
     for file in files:
-        out_path = file.parent / file.stem / "pages"
+        out_path = path_out / file.stem / "pages"
         job = build_job_from_file(path_in=file, path_out=out_path, overwrite=overwrite)
         jobs.append(job)
     return jobs
