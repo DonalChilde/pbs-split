@@ -119,7 +119,7 @@ def build_jobs_from_dir(
     glob = "*.page_*.json"
     if not path_in.is_dir():
         raise typer.BadParameter("PATH_IN should be a directory.")
-    typer.echo("Collecting split pages.......")
+    typer.echo("\nCollecting split pages.......")
     typer.echo(f"Looking for files in {path_in}")
     files = [f for f in path_in.glob(glob, case_sensitive=False) if f.is_file()]
     typer.echo(f"Found {len(files)} files")
@@ -161,7 +161,7 @@ def build_jobs_from_dir(
 def extract_trips_rich(jobs: Sequence[SplitTripJob]):
     """Process the jobs to split trips."""
     file_count = len(jobs)
-    typer.echo("\nSplitting pages into trips.....")
+    typer.echo("Splitting pages into trips.....")
     with Progress(
         TextColumn("[progress.description]{task.description}"),
         BarColumn(),
