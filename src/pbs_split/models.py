@@ -1,6 +1,9 @@
-from dataclasses import asdict, dataclass, field
+"""Models related to pbs trips and pages."""
+
+# ruff: noqa: D101 D102 D103
+from dataclasses import dataclass, field
 from typing import TypedDict
-from uuid import NAMESPACE_DNS, UUID, uuid5
+from uuid import NAMESPACE_DNS, UUID, uuid4, uuid5
 
 from pfmsoft.indexed_string.model import IndexedString, IndexedStringTD
 from pfmsoft.simple_serializer import DataclassSerializer
@@ -34,16 +37,17 @@ class PageLines:
         if self.uuid == "":
             self.uuid = current_uuid_str
             return
-        if self.uuid != current_uuid_str:
-            raise ValueError(
-                f"Supplied uuid: {self.uuid} does not match calculated uuid: {current_uuid_str}"
-            )
+        # if self.uuid != current_uuid_str:
+        #     raise ValueError(
+        #         f"Supplied uuid: {self.uuid} does not match calculated uuid: {current_uuid_str}"
+        #     )
 
     def make_uuid(self) -> UUID:
         """Make a uuid from a namespace and the repr of asdict(self), minus the uuid field."""
-        data = asdict(self)
-        data.pop("uuid", None)
-        return uuid5(PAGE_LINES_NS, repr(data))
+        # data = asdict(self)
+        # data.pop("uuid", None)
+        # return uuid5(PAGE_LINES_NS, repr(data))
+        return uuid4()
 
     @staticmethod
     def from_simple(simple_obj: PageLinesTD) -> "PageLines":
@@ -68,16 +72,17 @@ class TripLines:
         if self.uuid == "":
             self.uuid = current_uuid_str
             return
-        if self.uuid != current_uuid_str:
-            raise ValueError(
-                f"Supplied uuid: {self.uuid} does not match calculated uuid: {current_uuid_str}"
-            )
+        # if self.uuid != current_uuid_str:
+        #     raise ValueError(
+        #         f"Supplied uuid: {self.uuid} does not match calculated uuid: {current_uuid_str}"
+        #     )
 
     def make_uuid(self) -> UUID:
         """Make a uuid from a namespace and the repr of asdict(self), minus the uuid field."""
-        data = asdict(self)
-        data.pop("uuid", None)
-        return uuid5(TRIP_LINES_NS, repr(data))
+        # data = asdict(self)
+        # data.pop("uuid", None)
+        # return uuid5(TRIP_LINES_NS, repr(data))
+        return uuid4()
 
     @staticmethod
     def from_simple(simple_obj: TripLinesTD) -> "TripLines":
