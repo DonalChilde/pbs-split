@@ -122,6 +122,7 @@ def build_jobs_from_dir(
     glob = "*.txt"
     if not path_in.is_dir():
         raise typer.BadParameter("PATH_IN should be a directory.")
+    typer.echo("Collecting bid packages to split into pages.....")
     typer.echo(f"Looking for files in {path_in}")
     files = [f for f in path_in.glob(glob, case_sensitive=False) if f.is_file()]
     typer.echo(f"Found {len(files)} text files.")
@@ -175,6 +176,7 @@ def extract_pages_rich(jobs: Sequence[SplitPageJob]):
             f"1 of {file_count}", total=total_size_of_files(jobs=jobs)
         )
         total_pages = 0
+        typer.echo("\nSplitting bid packages into pages.....")
         for idx, job in enumerate(jobs, start=1):
             pages = parse_pages_from_file(path_in=job.path_in)
             page_count = write_pages(
