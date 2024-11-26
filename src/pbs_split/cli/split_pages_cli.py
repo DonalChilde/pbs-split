@@ -164,6 +164,7 @@ def build_jobs_from_dir(
 def extract_pages_rich(jobs: Sequence[SplitPageJob]):
     """Process the jobs to split pages."""
     file_count = len(jobs)
+    typer.echo("\nSplitting bid packages into pages.....")
     with Progress(
         TextColumn("[progress.description]{task.description}"),
         BarColumn(),
@@ -176,7 +177,6 @@ def extract_pages_rich(jobs: Sequence[SplitPageJob]):
             f"1 of {file_count}", total=total_size_of_files(jobs=jobs)
         )
         total_pages = 0
-        typer.echo("\nSplitting bid packages into pages.....")
         for idx, job in enumerate(jobs, start=1):
             pages = parse_pages_from_file(path_in=job.path_in)
             page_count = write_pages(

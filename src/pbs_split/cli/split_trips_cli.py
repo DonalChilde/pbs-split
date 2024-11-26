@@ -161,6 +161,7 @@ def build_jobs_from_dir(
 def extract_trips_rich(jobs: Sequence[SplitTripJob]):
     """Process the jobs to split trips."""
     file_count = len(jobs)
+    typer.echo("\nSplitting pages into trips.....")
     with Progress(
         TextColumn("[progress.description]{task.description}"),
         BarColumn(),
@@ -173,7 +174,6 @@ def extract_trips_rich(jobs: Sequence[SplitTripJob]):
             f"1 of {file_count}", total=total_size_of_files(jobs=jobs)
         )
         total_trips = 0
-        typer.echo("\nSplitting pages into trips.....")
         for idx, job in enumerate(jobs, start=1):
             trips = parse_trips_from_file(path_in=job.path_in)
             trip_count = write_trips(
